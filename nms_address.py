@@ -10,6 +10,7 @@ import time
 import logging
 import pyautogui
 import keyboard
+import win32gui
 
 # --- Configuration ---
 
@@ -64,6 +65,30 @@ GLYPH_LOCATIONS = [
 ]
 
 # --- Core Functions ---
+
+def is_terminal_active():
+    """
+    Checks if the currently active window is a terminal/console.
+    This is OS-specific and prevents the script from capturing keys globally.
+
+    Returns:
+        bool: True if a terminal window is active, False otherwise.
+    """
+    try:
+        # Use pywin32 to get the active window's title
+        hwnd = win32gui.GetForegroundWindow()
+        active_window_title = win32gui.GetWindowText(hwnd)
+        # Check for common Windows terminal titles
+        if "cmd.exe" in active_window_title or "powershell" in active_window_title or "Windows Terminal" in active_window_title or "Visual Studio" in active_window_title:
+            return True
+
+    except Exception as e:
+        # If any command fails (e.g., xdotool not installed), log it and default to False
+        logging.warning(f"Could not determine active window: {e}")
+        return False
+        
+    return False
+
 
 def detect_symbol(region, confidence=0.9):
     """
@@ -206,7 +231,7 @@ def main():
             key_event = keyboard.read_event()
             
             # We only care about the moment the key is pressed down
-            if key_event.event_type == keyboard.KEY_DOWN:
+            if key_event.event_type == keyboard.KEY_DOWN and is_terminal_active():
                 
                 # If the space bar was pressed, run the detection
                 if key_event.name == 'space':
