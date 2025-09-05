@@ -61,11 +61,15 @@ def detect_symbol(region, confidence=0.9):
             if pyautogui.locateOnScreen(filename, region=region, confidence=confidence):
                 logging.info(f"Detected symbol '{symbol}' in region {region}.")
                 return symbol
+
+        except pyautogui.ImageNotFoundException as e:
+            logging.debug(f"Image not found {symbol} @ {region}: {e}")
+
         except pyautogui.PyAutoGUIException as e:
             # This can happen if the image file is not found.
             logging.error(f"Error processing {filename}: {e}")
             # To avoid repeated errors for the same missing file, we can exit.
-            # sys.exit(1)
+            sys.exit(1)
         except Exception as e:
             # Catch other potential exceptions, though less likely.
             logging.warning(f"An unexpected error occurred for {filename} in {region}: {e}")
@@ -109,10 +113,10 @@ def portal_to_galactic_coords(portal_code):
 
     # Extract components from the portal code: P SSS YY ZZZ XXX
     p = portal_code[0]
-    sss = portal_code[1:4]
-    yy = portal_code[4:6]
-    zzz = portal_code[6:9]
-    xxx = portal_code[9:12]
+    sss = portal_code[1:3]
+    yy = portal_code[4:5]
+    zzz = portal_code[6:8]
+    xxx = portal_code[9:11]
 
     # Convert hex components to integers
     p_dec = int(p, 16)
