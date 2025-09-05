@@ -130,6 +130,9 @@ def portal_to_galactic_coords(portal_code):
     # Apply offsets for galactic coordinates calculation
     # TODO: These coordinates seem to be off by 2, should be 2047,127 & 2047
     # Need to figure out why
+    # x_offset = xxx_dec - 2047
+    # y_offset = yy_dec - 127
+    # z_offset = zzz_dec - 2047
     x_offset = xxx_dec - 2049
     y_offset = yy_dec - 129
     z_offset = zzz_dec - 2049
