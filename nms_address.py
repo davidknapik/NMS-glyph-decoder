@@ -8,6 +8,7 @@ import sys
 import time
 import logging
 import pyautogui
+import keyboard
 
 # --- Configuration ---
 
@@ -145,42 +146,66 @@ def portal_to_galactic_coords(portal_code):
 
     return galactic_coordinates, portal_code
 
+
+def run_detection_cycle():
+    """
+    Runs one full cycle of glyph detection and coordinate conversion.
+    This function is called when the user presses the space bar.
+    """
+    print("-" * 30)
+    logging.info("Scanning for portal address...")
+    
+    # 1. Get the full portal code from the screen
+    code = get_portal_code()
+
+    if code:
+        logging.info(f"Successfully decoded Portal Code: {code}")
+        
+        # 2. Convert the portal code to galactic coordinates
+        galactic_coords, _ = portal_to_galactic_coords(code)
+
+        if galactic_coords:
+            print(f"\n--- Decoded Address ---")
+            print(f"Portal Code: {code[0]}:{code[1:4]}:{code[4:6]}:{code[6:9]}:{code[9:12]}")
+            print(f"Galactic Coordinates: {galactic_coords}\n")
+
 # --- Main Execution ---
 
 def main():
     """
-    Main function to run the portal address decoder continuously.
+    Main function to run the portal address decoder on keypress.
+    Waits for user to press 'space' to capture or 'q' to quit.
     """
-    logging.info("Starting No Man's Sky Portal Decoder. Press Ctrl+C to exit.")
+    print("--- No Man's Sky Portal Decoder ---")
+    print("\nPress [SPACE] while glyphs are visible in photo mode.")
+    print("Press [Q] to quit the application.")
+    print("-" * 30)
     
     while True:
         try:
-            print("-" * 30)
-            logging.info("Attempting to decode portal address...")
+            # Wait for the next key press event
+            key_event = keyboard.read_event()
             
-            # 1. Get the full portal code from the screen
-            code = get_portal_code()
-
-            if code:
-                logging.info(f"Successfully decoded Portal Code: {code}")
+            # We only care about the moment the key is pressed down
+            if key_event.event_type == keyboard.KEY_DOWN:
                 
-                # 2. Convert the portal code to galactic coordinates
-                galactic_coords, _ = portal_to_galactic_coords(code)
-
-                if galactic_coords:
-                    print(f"\n--- Decoded Address ---")
-                    print(f"Portal Code: {code[0]}:{code[1:4]}:{code[4:6]}:{code[6:9]}:{code[9:12]}")
-                    print(f"Galactic Coordinates: {galactic_coords}\n")
-            
-            # Wait for a couple of seconds before trying again
-            time.sleep(2)
-
+                # If the space bar was pressed, run the detection
+                if key_event.name == 'space':
+                    run_detection_cycle()
+                    # After running, prompt the user again for clarity
+                    print("Ready. Press [SPACE] to capture again or [Q] to quit.")
+                
+                # If 'q' was pressed, exit the application
+                elif key_event.name == 'q':
+                    logging.info("'q' pressed. Exiting application.")
+                    break  # Exit the while loop
+                    
         except KeyboardInterrupt:
-            logging.info("Script stopped by user.")
-            sys.exit(0)
+            logging.info("Script stopped by user (Ctrl+C).")
+            break
         except Exception as e:
             logging.error(f"An unexpected error occurred in the main loop: {e}")
-            time.sleep(5) # Wait a bit longer after an unexpected error
+            break
 
 if __name__ == "__main__":
     main()
