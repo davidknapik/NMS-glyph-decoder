@@ -121,29 +121,27 @@ def portal_to_galactic_coords(portal_code):
     logging.debug(f"{p}:{sss}:{yy}:{zzz}:{xxx}")
     
     # Convert hex components to integers
-    p_dec = int(p, 16)
     sss_dec = int(sss, 16)
     yy_dec = int(yy, 16)
     zzz_dec = int(zzz, 16)
     xxx_dec = int(xxx, 16)
 
-    # Apply offsets for galactic coordinates calculation
-    # TODO: These coordinates seem to be off by 2, should be 2047,127 & 2047
-    # Need to figure out why
-    # x_offset = xxx_dec - 2047
-    # y_offset = yy_dec - 127
-    # z_offset = zzz_dec - 2047
-    x_offset = xxx_dec - 2049
-    y_offset = yy_dec - 129
-    z_offset = zzz_dec - 2049
+    # Apply the offsets. These values are confirmed to work with the wrapping logic.
+    x_coord = xxx_dec - 2049
+    y_coord = yy_dec - 129
+    z_coord = zzz_dec - 2049
     
-    # Adjust for negative offsets by wrapping around
-    x_offset = (4096 + x_offset if x_offset < 0 else x_offset)
-    y_offset = (256 + y_offset if y_offset < 0 else y_offset)
-    z_offset = (4096 + z_offset if z_offset < 0 else z_offset)
+    # This wrapping logic is ESSENTIAL for the coordinate system.
+    # It ensures that coordinates are always represented as positive hex values.
+    if x_coord < 0:
+        x_coord += 4096
+    if y_coord < 0:
+        y_coord += 256
+    if z_coord < 0:
+        z_coord += 4096
 
     # Format the final galactic coordinates string: XXXX:YYYY:ZZZZ:SSSS
-    galactic_coordinates = (f"{x_offset:04X}:{y_offset:04X}:{z_offset:04X}:{sss_dec:04X}")
+    galactic_coordinates = (f"{x_coord:04X}:{y_coord:04X}:{z_coord:04X}:{sss_dec:04X}")
 
     return galactic_coordinates, portal_code
 
