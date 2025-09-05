@@ -4,6 +4,7 @@ Main routine for No Man's Sky screenshot address decoder.
 This script detects a 12-character portal address on the screen,
 decodes it, and converts it into galactic coordinates.
 """
+import os
 import sys
 import time
 import logging
@@ -19,12 +20,30 @@ pyautogui.FAILSAFE = True
 # Configure logging to show informational messages.
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
-# A dictionary mapping glyph characters to their corresponding image filenames.
+
+# Get the absolute path of the directory where this script is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Define the path to the symbols folder
+SYMBOLS_DIR = os.path.join(BASE_DIR, "assets", "symbols")
+
+# A dictionary mapping glyph characters to their full, absolute image filepaths.
 SYMBOL_FILES = {
-    "0": "symbol_0.png", "1": "symbol_1.png", "2": "symbol_2.png", "3": "symbol_3.png",
-    "4": "symbol_4.png", "5": "symbol_5.png", "6": "symbol_6.png", "7": "symbol_7.png",
-    "8": "symbol_8.png", "9": "symbol_9.png", "A": "symbol_a.png", "B": "symbol_b.png",
-    "C": "symbol_c.png", "D": "symbol_d.png", "E": "symbol_e.png", "F": "symbol_f.png"
+    "0": os.path.join(SYMBOLS_DIR, "symbol_0.png"),
+    "1": os.path.join(SYMBOLS_DIR, "symbol_1.png"),
+    "2": os.path.join(SYMBOLS_DIR, "symbol_2.png"),
+    "3": os.path.join(SYMBOLS_DIR, "symbol_3.png"),
+    "4": os.path.join(SYMBOLS_DIR, "symbol_4.png"),
+    "5": os.path.join(SYMBOLS_DIR, "symbol_5.png"),
+    "6": os.path.join(SYMBOLS_DIR, "symbol_6.png"),
+    "7": os.path.join(SYMBOLS_DIR, "symbol_7.png"),
+    "8": os.path.join(SYMBOLS_DIR, "symbol_8.png"),
+    "9": os.path.join(SYMBOLS_DIR, "symbol_9.png"),
+    "A": os.path.join(SYMBOLS_DIR, "symbol_a.png"),
+    "B": os.path.join(SYMBOLS_DIR, "symbol_b.png"),
+    "C": os.path.join(SYMBOLS_DIR, "symbol_c.png"),
+    "D": os.path.join(SYMBOLS_DIR, "symbol_d.png"),
+    "E": os.path.join(SYMBOLS_DIR, "symbol_e.png"),
+    "F": os.path.join(SYMBOLS_DIR, "symbol_f.png"),
 }
 
 # A list of tuples defining the screen region for each of the 12 glyph locations.
