@@ -30,13 +30,29 @@ An interactive Python utility that automates the decoding of No Man's Sky portal
     git clone https://github.com/davidknapik/no-mans-sky-decoder.git
     cd no-mans-sky-decoder
     ```
-
-2.  **Install the required Python packages:**
+2. **Set up Virtual env
     ```bash
+    python -m venv .venv
+    ```
+3. **Activate Virtual env
+    ```bash
+    .\.venv\Scripts\activate
+    ```
+4.  **Upgrade pip and Install the required Python packages:**
+    ```bash
+    python -m pip install --upgrade pip
     pip install -r requirements.txt
     ```
 
-3.  **Verify Asset Location**: Ensure the 16 glyph images (`symbol_0.png` through `symbol_f.png`) are located inside the `assets/symbols/` directory.
+5.  **Verify Asset Location**: Ensure the 16 glyph images (`symbol_0.png` through `symbol_f.png`) are located inside the `assets/symbols/` directory.
+
+6.  **Run self tests
+   ```bash
+    python .\tests\run_tests.py
+   ```
+   ```bash
+   python .\tests\test_logic.py
+   ```
 
 ---
 
@@ -119,5 +135,6 @@ Areas for future improvement could include:
 ---
 
 ## License
+
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
