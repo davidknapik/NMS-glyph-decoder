@@ -113,11 +113,13 @@ def portal_to_galactic_coords(portal_code):
 
     # Extract components from the portal code: P SSS YY ZZZ XXX
     p = portal_code[0]
-    sss = portal_code[1:3]
-    yy = portal_code[4:5]
-    zzz = portal_code[6:8]
-    xxx = portal_code[9:11]
+    sss = portal_code[1:4]
+    yy = portal_code[4:6]
+    zzz = portal_code[6:9]
+    xxx = portal_code[9:12]
 
+    logging.debug(f"{p}:{sss}:{yy}:{zzz}:{xxx}")
+    
     # Convert hex components to integers
     p_dec = int(p, 16)
     sss_dec = int(sss, 16)
@@ -126,10 +128,17 @@ def portal_to_galactic_coords(portal_code):
     xxx_dec = int(xxx, 16)
 
     # Apply offsets for galactic coordinates calculation
-    x_offset = xxx_dec - 2047
-    y_offset = yy_dec - 127
-    z_offset = zzz_dec - 2047
+    # TODO: These coordinates seem to be off by 2, should be 2047,127 & 2047
+    # Need to figure out why
+    x_offset = xxx_dec - 2049
+    y_offset = yy_dec - 129
+    z_offset = zzz_dec - 2049
     
+    # Adjust for negative offsets by wrapping around
+    x_offset = (4096 + x_offset if x_offset < 0 else x_offset)
+    y_offset = (256 + y_offset if y_offset < 0 else y_offset)
+    z_offset = (4096 + z_offset if z_offset < 0 else z_offset)
+
     # Format the final galactic coordinates string: XXXX:YYYY:ZZZZ:SSSS
     galactic_coordinates = (f"{x_offset:04X}:{y_offset:04X}:{z_offset:04X}:{sss_dec:04X}")
 
@@ -159,7 +168,7 @@ def main():
 
                 if galactic_coords:
                     print(f"\n--- Decoded Address ---")
-                    print(f"Portal Code: {code}")
+                    print(f"Portal Code: {code[0]}:{code[1:4]}:{code[4:6]}:{code[6:9]}:{code[9:12]}")
                     print(f"Galactic Coordinates: {galactic_coords}\n")
             
             # Wait for a couple of seconds before trying again
