@@ -20,9 +20,9 @@ pyautogui.FAILSAFE = True
 # Configure logging to show informational messages.
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
-
 # Get the absolute path of the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Define the path to the symbols folder
 SYMBOLS_DIR = os.path.join(BASE_DIR, "assets", "symbols")
 
@@ -138,9 +138,10 @@ def portal_to_galactic_coords(portal_code):
     zzz = portal_code[6:9]
     xxx = portal_code[9:12]
 
+    # Just checking that the string is parsed correctly
     logging.debug(f"{p}:{sss}:{yy}:{zzz}:{xxx}")
     
-    # Convert hex components to integers
+    # Convert components from hex to integers
     sss_dec = int(sss, 16)
     yy_dec = int(yy, 16)
     zzz_dec = int(zzz, 16)
@@ -169,9 +170,9 @@ def portal_to_galactic_coords(portal_code):
 def run_detection_cycle():
     """
     Runs one full cycle of glyph detection and coordinate conversion.
-    This function is called when the user presses the space bar.
+    This function is called when the user presses the defined key.
     """
-    print("-" * 30)
+    print("#" * 60)
     logging.info("Scanning for portal address...")
     
     # 1. Get the full portal code from the screen
@@ -183,10 +184,13 @@ def run_detection_cycle():
         # 2. Convert the portal code to galactic coordinates
         galactic_coords, _ = portal_to_galactic_coords(code)
 
+        # 3. Output the results
         if galactic_coords:
             print(f"\n--- Decoded Address ---")
             print(f"Portal Code: {code[0]}:{code[1:4]}:{code[4:6]}:{code[6:9]}:{code[9:12]}")
             print(f"Galactic Coordinates: {galactic_coords}\n")
+
+    print("#" * 60)
 
 # --- Main Execution ---
 
@@ -198,7 +202,7 @@ def main():
     print("--- No Man's Sky Portal Decoder ---")
     print("\nPress [`] while glyphs are visible in photo mode.")
     print("Press [ctrl+c] to quit the application.")
-    print("-" * 30)
+    print("#" * 60)
     
     while True:
         try:
@@ -208,7 +212,7 @@ def main():
             # We only care about the moment the key is pressed down
             if key_event.event_type == keyboard.KEY_DOWN:
                 
-                # If the space bar was pressed, run the detection
+                # If the defined key was pressed, run the detection
                 if key_event.name == '`':
                     run_detection_cycle()
                     # After running, prompt the user again for clarity
