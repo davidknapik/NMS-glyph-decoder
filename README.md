@@ -62,20 +62,19 @@ An interactive Python utility that automates the decoding of No Man's Sky portal
     ```bash
     python nms_address.py
     ```
-    *(Remember to use `sudo python ...` on Linux)*
 
 2.  You will see the following message in your terminal:
     ```
     --- No Man's Sky Portal Decoder ---
 
-    Press [SPACE] while glyphs are visible in photo mode.
-    Press [Q] to quit the application.
+    Press [`] while glyphs are visible in photo mode.
+    Press [ctrl+c] to quit the application.
     ------------------------------
     ```
 
 3.  **In No Man's Sky**, activate your camera (photo mode). Once the 12 glyphs are visible at the bottom-left of your screen (usually in Photo Mode), switch back to the terminal.
 
-4.  **Press the `SPACE` key.** The script will immediately scan the predefined screen locations, detect the glyphs, and print the decoded address.
+4.  **Press the '`' key.** The script will immediately scan the predefined screen locations, detect the glyphs, and print the decoded address.
 
     ```
     --- Decoded Address ---
@@ -83,7 +82,7 @@ An interactive Python utility that automates the decoding of No Man's Sky portal
     Galactic Coordinates: 094C:0079:0128:007A
     ```
 
-5.  **Press `Q`** at any time to quit the application.
+5.  **Press `ctrl+c`** at any time to quit the application.
 
 ---
 
@@ -122,6 +121,13 @@ This test validates the `portal_to_galactic_coords` function without any screen 
     ```
 
 ---
+## Troubleshooting
+
+### WARNING:root:No symbol detected in region (xxx)
+    Typically this occurs if there is not enough contrast between the symbols and the background.
+
+    Best results is if you move the camera so the background behind the symobls is dark, and consistent.
+    Might be able to lower the confidence variable.
 
 ## Contributing
 
@@ -131,6 +137,7 @@ Areas for future improvement could include:
 -   Support for different screen resolutions.
 -   A graphical user interface (GUI).
 -   Automatic detection of when glyphs are on-screen.
+-   Better symbol detection when there is less consistent background
 
 ---
 
