@@ -193,11 +193,11 @@ def run_detection_cycle():
 def main():
     """
     Main function to run the portal address decoder on keypress.
-    Waits for user to press 'space' to capture or 'q' to quit.
+    Waits for user to press '`' to capture or 'ctrl+c' to quit.
     """
     print("--- No Man's Sky Portal Decoder ---")
-    print("\nPress [SPACE] while glyphs are visible in photo mode.")
-    print("Press [Q] to quit the application.")
+    print("\nPress [`] while glyphs are visible in photo mode.")
+    print("Press [ctrl+c] to quit the application.")
     print("-" * 30)
     
     while True:
@@ -208,15 +208,15 @@ def main():
             # We only care about the moment the key is pressed down
             if key_event.event_type == keyboard.KEY_DOWN:
                 
-                # If the space bar was pressed, run the detection
-                if key_event.name == 'space':
+                # If the '`' was pressed, run the detection
+                if key_event.name == '`':
                     run_detection_cycle()
                     # After running, prompt the user again for clarity
-                    print("Ready. Press [SPACE] to capture again or [Q] to quit.")
+                    print("Ready. Press [`] to capture again or [ctrl+c] to quit.")
                 
                 # If 'q' was pressed, exit the application
-                elif key_event.name == 'q':
-                    logging.info("'q' pressed. Exiting application.")
+                elif key_event.name == 'ctrl+c':
+                    logging.info("'ctrl+c' pressed. Exiting application.")
                     break  # Exit the while loop
                     
         except KeyboardInterrupt:
