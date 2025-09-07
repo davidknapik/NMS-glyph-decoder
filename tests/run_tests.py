@@ -33,12 +33,11 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 # Now we can import the functions from nms_address.py
-from nms_address import get_portal_code, portal_to_galactic_coords
-
+from nms_address import get_portal_code, calculate_overall_confidence, get_confidence_rank
 # --- Test Execution ---
 
 def run_test(image_path, expected_code):
-    """Displays an image, runs detection, and returns the result."""
+    """Displays an image, runs detection, and returns the results."""
     
     # Create a full-screen, borderless window
     root = tk.Tk()
@@ -53,6 +52,7 @@ def run_test(image_path, expected_code):
     
     # This is a variable that will hold the result from the detection
     detected_code = None
+    confidence_scores = []
 
     try:
         # We must update the window to ensure it is drawn before pyautogui scans it.
@@ -64,13 +64,14 @@ def run_test(image_path, expected_code):
         print(f"\nScanning for glyphs in {os.path.basename(image_path)}...")
         
         # --- Run the actual detection from the main script ---
-        detected_code = get_portal_code()
+        # The function now returns a tuple: (code, scores)
+        detected_code, confidence_scores = get_portal_code()
 
     finally:
         # IMPORTANT: Always destroy the window, even if the test fails
         root.destroy()
         
-    return detected_code
+    return detected_code, confidence_scores
 
 
 def main():
@@ -91,18 +92,28 @@ def main():
             failed_count += 1
             continue
             
-        # Run the test for the current image
-        actual_code = run_test(image_path, expected_code)
+        # Run the test and get both the code and the scores
+        actual_code, scores = run_test(image_path, expected_code)
+        
+        # Calculate overall confidence for a more informative output
+        overall_confidence = 0.0
+        rank = "N/A"
+        if scores:
+            overall_confidence = calculate_overall_confidence(scores)
+            rank = get_confidence_rank(overall_confidence)
 
-        # Compare the results
+        # Compare the results, focusing on the portal code itself
         if actual_code == expected_code:
             print(f"✅ PASS: Detected code matches expected code.")
-            print(f"   - Detected: {actual_code}")
+            print(f"   - Detected:   {actual_code}")
+            print(f"   - Confidence: {overall_confidence:.2%} ({rank})")
             passed_count += 1
         else:
             print(f"❌ FAIL: Detected code does not match expected code!")
-            print(f"   - Expected: {expected_code}")
-            print(f"   - Detected: {actual_code}")
+            print(f"   - Expected:   {expected_code}")
+            print(f"   - Detected:   {actual_code}")
+            if scores:
+                 print(f"   - Confidence: {overall_confidence:.2%} ({rank})")
             failed_count += 1
 
     print("\n--- Test Summary ---")

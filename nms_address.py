@@ -2,7 +2,8 @@
 Main routine for No Man's Sky screenshot address decoder.
 
 This script detects a 12-character portal address on the screen,
-decodes it, and converts it into galactic coordinates.
+decodes it, and converts it into galactic coordinates using a
+best-match confidence algorithm.
 """
 import os
 import sys
@@ -10,6 +11,7 @@ import time
 import logging
 import pyautogui
 import keyboard
+import math # <-- Needed for geometric mean calculation
 
 # --- Configuration ---
 
@@ -65,55 +67,87 @@ GLYPH_LOCATIONS = [
 
 # --- Core Functions ---
 
-def detect_symbol(region, confidence=0.9):
+def find_best_symbol(region):
     """
-    Detects which glyph symbol is present in a given screen region.
+    Finds the symbol that matches the given region with the highest confidence.
 
-    Args:
-        region (tuple): The (left, top, width, height) of the screen region to search.
-        confidence (float): The confidence level for image matching.
+    Iterates from confidence 0.99 down to 0.25, checking all 16 symbols at
+    each step. The first symbol found is the best possible match.
 
     Returns:
-        str: The character ('0'-'F') of the detected symbol, or None if no symbol is found.
+        tuple: A tuple containing (best_symbol, confidence_score) or (None, 0) if no match is found.
     """
-    for symbol, filename in SYMBOL_FILES.items():
-        try:
-            if pyautogui.locateOnScreen(filename, region=region, confidence=confidence):
-                logging.info(f"Detected symbol '{symbol}' in region {region}.")
-                return symbol
+    # Iterate downwards from 99% confidence to 25%
+    for i in range(99, 25, -5):
+        confidence = i / 100.0
+        for symbol, filename in SYMBOL_FILES.items():
+            try:
+                if pyautogui.locateOnScreen(filename, region=region, confidence=confidence):
+                    logging.info(f"Best match is '{symbol}' in {region} with confidence {confidence:.2f}")
+                    return symbol, confidence
+                
+            except pyautogui.ImageNotFoundException as e:
+                logging.debug(f"Image not found {symbol} @ {region}: {e}")
 
-        except pyautogui.ImageNotFoundException as e:
-            logging.debug(f"Image not found {symbol} @ {region}: {e}")
+            except pyautogui.PyAutoGUIException as e:
+                # This can happen if the image file is not found.
+                logging.error(f"Error processing {filename}: {e}")
+                # To avoid repeated errors for the same missing file, we can exit.
+                sys.exit(1)
+                
+            except Exception as e:
+                # Catch other potential exceptions, though less likely.
+                logging.warning(f"An unexpected error occurred for {filename} in {region}: {e}")
+                    
+    logging.warning(f"No symbol detected in region {region} with confidence > 25%.")
+    return None, 0.0
 
-        except pyautogui.PyAutoGUIException as e:
-            # This can happen if the image file is not found.
-            logging.error(f"Error processing {filename}: {e}")
-            # To avoid repeated errors for the same missing file, we can exit.
-            sys.exit(1)
-        except Exception as e:
-            # Catch other potential exceptions, though less likely.
-            logging.warning(f"An unexpected error occurred for {filename} in {region}: {e}")
-            
-    logging.warning(f"No symbol detected in region {region}.")
-    return None
+
+def calculate_overall_confidence(scores):
+    """
+    Calculates the overall confidence using the Geometric Mean of individual scores.
+    Returns 0 if any score is 0 to avoid math errors.
+    """
+    if not scores or any(s <= 0 for s in scores):
+        return 0.0
+    
+    # Calculate the product of all scores
+    product = math.prod(scores)
+    # Return the nth root, where n is the number of scores
+    return math.pow(product, 1.0 / len(scores))
+
+
+def get_confidence_rank(score):
+    """Converts a numerical confidence score (0.0-1.0) into a ranking."""
+    if score >= 0.75:
+        return "High"
+    elif score >= 0.50:
+        return "Medium"
+    elif score >= 0.25:
+        return "Low"
+    else:
+        return "None"
 
 
 def get_portal_code():
     """
-    Scans all glyph locations on the screen and assembles the full 12-character portal code.
+    Scans all glyph locations and assembles the portal code and confidence scores.
 
     Returns:
-        str: The complete 12-character portal code, or None if any symbol is not detected.
+        tuple: (portal_code, confidence_scores) or (None, []) if any symbol fails.
     """
     portal_code = ""
+    confidence_scores = []
     for i, location in enumerate(GLYPH_LOCATIONS):
-        symbol = detect_symbol(location)
+        symbol, confidence = find_best_symbol(location)
         if symbol:
             portal_code += symbol
+            confidence_scores.append(confidence)
         else:
             logging.error(f"Could not decode symbol at location {i+1}. Aborting.")
-            return None
-    return portal_code
+            return None, []
+            
+    return portal_code, confidence_scores
 
 
 def portal_to_galactic_coords(portal_code):
@@ -169,26 +203,31 @@ def portal_to_galactic_coords(portal_code):
 
 def run_detection_cycle():
     """
-    Runs one full cycle of glyph detection and coordinate conversion.
-    This function is called when the user presses the defined key.
+    Runs one full cycle of detection, conversion, and confidence analysis.
     """
     print("#" * 60)
-    logging.info("Scanning for portal address...")
+    logging.info("Scanning for portal address using best-match algorithm...")
     
     # 1. Get the full portal code from the screen
-    code = get_portal_code()
-
+    code, scores = get_portal_code()
     if code:
         logging.info(f"Successfully decoded Portal Code: {code}")
         
         # 2. Convert the portal code to galactic coordinates
         galactic_coords, _ = portal_to_galactic_coords(code)
+        
+        # Calculate and rank the overall confidence
+        overall_confidence = calculate_overall_confidence(scores)
+        rank = get_confidence_rank(overall_confidence)
 
         # 3. Output the results
         if galactic_coords:
             print(f"\n--- Decoded Address ---")
-            print(f"Portal Code: {code[0]}:{code[1:4]}:{code[4:6]}:{code[6:9]}:{code[9:12]}")
-            print(f"Galactic Coordinates: {galactic_coords}\n")
+            print(f"Portal Code:          {code[0]}:{code[1:4]}:{code[4:6]}:{code[6:9]}:{code[9:12]}")
+            print(f"Galactic Coordinates: {galactic_coords}")
+            print(f"Overall Confidence:   {overall_confidence:.2%} ({rank})") # Formats as percentage
+            print(f"Individual Scores:    {[f'{s:.2%}' for s in scores]}")
+            print("")
 
     print("#" * 60)
 
