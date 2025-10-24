@@ -77,13 +77,13 @@ def find_best_symbol(region):
     Returns:
         tuple: A tuple containing (best_symbol, confidence_score) or (None, 0) if no match is found.
     """
-    # Iterate downwards from 99% confidence to 25%
-    for i in range(99, 25, -5):
+    # Iterate downwards from 95% confidence to 25% step by 5% 
+    for i in range(95, 25, -5):
         confidence = i / 100.0
         for symbol, filename in SYMBOL_FILES.items():
             try:
                 if pyautogui.locateOnScreen(filename, region=region, confidence=confidence):
-                    logging.info(f"Best match is '{symbol}' in {region} with confidence {confidence:.2f}")
+                    logging.info(f"Region:{region} FOUND symbol:'{symbol}' with confidence > {confidence:.2f}")
                     return symbol, confidence
                 
             except pyautogui.ImageNotFoundException as e:
@@ -98,7 +98,9 @@ def find_best_symbol(region):
             except Exception as e:
                 # Catch other potential exceptions, though less likely.
                 logging.warning(f"An unexpected error occurred for {filename} in {region}: {e}")
-                    
+
+            logging.debug(f"Region:{region} NOT FOUND Symbol:'{symbol}' with confidence > {confidence:.2f}")
+
     logging.warning(f"No symbol detected in region {region} with confidence > 25%.")
     return None, 0.0
 

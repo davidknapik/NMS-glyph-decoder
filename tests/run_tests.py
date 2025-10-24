@@ -20,7 +20,7 @@ TEST_CASES = {
     "TestImage03.png": "10EF004175B8",  
     "TestImage04.png": "10D6024185B8",  
     "TestImage05.png": "122CF79B1D82",  
-
+    "TestImage06.png": "3017F9FD16D2",  
 }
 
 # --- Setup for Importing from Parent Directory ---

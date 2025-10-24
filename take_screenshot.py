@@ -33,7 +33,7 @@ def take_shot(_region_):
     
 def main():
 
-    take_shot(_loc04_)
+    take_shot(_loc01_)
 
 if __name__ == "__main__":
     main()
